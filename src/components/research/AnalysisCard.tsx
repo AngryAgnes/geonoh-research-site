@@ -9,7 +9,7 @@ interface AnalysisCardProps {
 
 export default function AnalysisCard({ post, companyName }: AnalysisCardProps) {
   return (
-    <article className="flex h-full flex-col rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs font-semibold uppercase text-slate-500">{post.companyTicker}</div>
@@ -26,7 +26,7 @@ export default function AnalysisCard({ post, companyName }: AnalysisCardProps) {
 
       <Link
         href="/analysis"
-        className="mt-5 text-sm font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-600"
+        className="mt-5 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 transition hover:text-emerald-700"
       >
         View analysis index
       </Link>

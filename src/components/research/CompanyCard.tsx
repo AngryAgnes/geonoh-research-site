@@ -4,7 +4,7 @@ import ViewBadge from './ViewBadge'
 
 export default function CompanyCard({ company }: { company: Company }) {
   return (
-    <article className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-950">{company.name}</h3>
@@ -19,7 +19,7 @@ export default function CompanyCard({ company }: { company: Company }) {
 
       <Link
         href="/companies"
-        className="mt-5 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-600"
+        className="mt-5 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 transition hover:text-emerald-700"
       >
         View company hubs
       </Link>

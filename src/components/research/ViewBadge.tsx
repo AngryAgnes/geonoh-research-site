@@ -26,7 +26,7 @@ export const formatTimeHorizon = (timeHorizon: TimeHorizon): string =>
 export default function ViewBadge({ view }: { view: InvestmentView }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${viewStyles[view]}`}
+      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${viewStyles[view]}`}
     >
       {formatInvestmentView(view)}
     </span>

@@ -1,36 +1,44 @@
+import Link from 'next/link'
 import React from 'react'
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a
+  <Link
     href={href}
-    className="text-sm text-slate-700 hover:text-slate-900 px-3 py-2 rounded-sm"
+    className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
   >
     {children}
-  </a>
+  </Link>
 )
 
 export default function SiteHeader() {
   return (
-    <header className="w-full border-b border-slate-200 bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div>
-          <a href="/" className="text-lg font-semibold text-slate-900">
-            Geon Oh Kim Research
-          </a>
-          <div className="text-xs text-slate-500">Long-term company analysis</div>
+    <header className="w-full border-b border-slate-200 bg-white/95">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-950 text-sm font-semibold text-white"
+            aria-label="Geon Oh Kim Research home"
+          >
+            GK
+          </Link>
+          <div>
+            <Link href="/" className="text-base font-semibold text-slate-950">
+              Geon Oh Kim Research
+            </Link>
+            <div className="mt-0.5 text-xs font-medium text-slate-500">
+              Long-term company analysis
+            </div>
+          </div>
         </div>
 
-        <nav className="hidden md:flex items-center" aria-label="Primary navigation">
+        <nav className="flex flex-wrap items-center gap-1" aria-label="Primary navigation">
           <NavLink href="/">Home</NavLink>
           <NavLink href="/analysis">Analysis</NavLink>
           <NavLink href="/companies">Companies</NavLink>
           <NavLink href="/documents">Documents</NavLink>
           <NavLink href="/admin">Admin</NavLink>
         </nav>
-
-        <div className="md:hidden">
-          <button aria-label="Open menu" className="text-slate-600">☰</button>
-        </div>
       </div>
     </header>
   )
