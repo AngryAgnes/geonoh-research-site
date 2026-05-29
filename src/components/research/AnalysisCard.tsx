@@ -25,10 +25,10 @@ export default function AnalysisCard({ post, companyName }: AnalysisCardProps) {
       <p className="mt-4 flex-1 text-sm leading-6 text-slate-600">{post.summary}</p>
 
       <Link
-        href="/analysis"
+        href={`/research/${post.slug}`}
         className="mt-5 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 transition hover:text-emerald-700"
       >
-        View analysis index
+        Read report
       </Link>
     </article>
   )

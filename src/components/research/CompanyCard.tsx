@@ -18,10 +18,10 @@ export default function CompanyCard({ company }: { company: Company }) {
       <p className="mt-4 text-sm leading-6 text-slate-600">{company.researchSummary}</p>
 
       <Link
-        href="/companies"
+        href={`/companies/${company.slug}`}
         className="mt-5 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 transition hover:text-emerald-700"
       >
-        View company hubs
+        View company hub
       </Link>
     </article>
   )

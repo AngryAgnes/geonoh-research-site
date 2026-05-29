@@ -17,10 +17,10 @@ export default function HeroSection() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/analysis"
+              href="/research"
               className="inline-flex items-center justify-center rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              Read analysis
+              Read research
             </Link>
             <Link
               href="/companies"

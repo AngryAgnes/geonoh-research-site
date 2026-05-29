@@ -16,10 +16,10 @@ export default function FeaturedAnalysis({ items }: { items: readonly FeaturedAn
           <h2 className="mt-3 text-2xl font-semibold text-slate-950">Current demo research notes</h2>
         </div>
         <Link
-          href="/analysis"
+          href="/research"
           className="inline-flex rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
         >
-          Browse analysis
+          Browse research
         </Link>
       </div>
 

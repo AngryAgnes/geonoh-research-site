@@ -34,10 +34,9 @@ export default function SiteHeader() {
 
         <nav className="flex flex-wrap items-center gap-1" aria-label="Primary navigation">
           <NavLink href="/">Home</NavLink>
-          <NavLink href="/analysis">Analysis</NavLink>
+          <NavLink href="/research">Research</NavLink>
           <NavLink href="/companies">Companies</NavLink>
           <NavLink href="/documents">Documents</NavLink>
-          <NavLink href="/admin">Admin</NavLink>
         </nav>
       </div>
     </header>
