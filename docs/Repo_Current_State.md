@@ -1,18 +1,20 @@
 # Repo Current State
 
-- Current branch: not available; this workspace does not currently include `.git` metadata.
-- Completed tickets: T0000 (planning docs added), T0001 (Next.js scaffold initialized), T0002 (base layout, header, footer), T0002A (placeholder navigation pages), T0003 (demo data and core types)
-- Current app status: Minimal Next.js + TypeScript + Tailwind scaffold present in `src/`, with a persistent header/footer shell, placeholder pages for `/analysis`, `/companies`, `/documents`, and `/admin`, and typed demo research data under `src/lib/demo-data/`.
+- Current branch: `t0009-admin-report-management`
+- Completed tickets: T0000 (planning docs added), T0001 (Next.js scaffold initialized), T0002 (base layout, header, footer), T0002A (placeholder navigation pages), T0003 (demo data and core types), T0004 (public home page), T0004A (homepage styling and Tailwind setup fix), initial Supabase admin/report-management slice, Phase 1 public route coherence
+- Current app status: Next.js + TypeScript + Tailwind scaffold present in `src/`, with a persistent header/footer shell, public pages for `/`, `/research`, `/research/[slug]`, `/companies`, `/companies/[slug]`, and `/documents`, typed demo research data under `src/lib/demo-data/`, a homepage with explicit Supabase-vs-demo fallback behavior, and a protected `/admin` flow backed by Supabase Auth plus server-side approved-email checks.
 - Installed dependencies: declared dependencies are installed locally; `node_modules/` and `package-lock.json` are present.
 - Available scripts: `dev`, `build`, `start`, `lint`, `typecheck` (see `package.json`).
 - Demo data status: core TypeScript types are in `src/types/research.ts`; demo companies, analysis posts, research documents, thesis updates, stock snapshots, and lookup helpers are exported from `src/lib/demo-data/`.
-- Build/typecheck status: `npm run typecheck` passed and `npm run build` passed for T0003 on 2026-05-23.
-- Local dev verification: During T0003 verification, ports `3000` and `3001` were already in use, so a fresh Next.js dev server served this app at `http://localhost:3002`. The home page and `/analysis`, `/companies`, `/documents`, and `/admin` returned `200` on that port.
+- Tailwind status: `src/app/layout.tsx` imports `./globals.css`; `src/app/globals.css` includes Tailwind base/components/utilities and base-layer body/link styling; `tailwind.config.cjs` scans `src/app`, `src/components`, and `src/lib` for `js`, `ts`, `jsx`, `tsx`, and `mdx` files.
+- Supabase/admin status: Supabase SSR and JS clients are installed. Public reads use the anon client. Admin login uses Supabase email/password auth. Admin writes/uploads use a server-only service role client after checking the signed-in email against `ADMIN_EMAILS`. The public header does not show an Admin link.
+- Report management status: `/admin` shows a configuration/login/access state, then an admin dashboard with report creation, draft/publish controls, optional company creation, and document upload. `/research`, `/research/[slug]`, `/companies`, `/companies/[slug]`, and `/documents` read published Supabase content when configured. `/analysis` redirects to `/research`. Public pages show clearly labeled demo fallback content only when Supabase is not configured. `/documents/[id]/download` creates a short-lived signed URL for public documents.
+- Build/typecheck status: `npm run typecheck`, `npm run build`, and `npm run lint` passed for the Phase 1 public route coherence slice on 2026-05-30.
+- Local dev verification: A production build listed routes for `/`, `/analysis`, `/companies`, `/companies/[slug]`, `/documents`, `/research`, and `/research/[slug]`. With no local Supabase environment variables configured, public pages use explicit demo fallback content and `/admin` shows the expected configuration-required state.
 - Known issues:
-  - Supabase not configured
-  - Google OAuth not configured
-  - Admin is only a placeholder; no auth or dashboard behavior exists yet
-  - Document upload/download, analysis CRUD, stock API, and data layer are not implemented yet
+  - Supabase credentials, Auth user, schema, and storage bucket/policies still need to be configured in the Supabase dashboard.
+  - End-to-end login, non-admin blocking, report creation, publishing, and upload/download flows require real Supabase credentials and were not fully exercised locally.
+  - Google OAuth is not configured; admin login currently uses Supabase email/password.
+  - Editing/deleting reports, rich Markdown rendering, essays/projects, and stock API are not implemented yet.
   - Demo data is static and intentionally not connected to Supabase or live market data
-  - Port `3000` may be occupied in the local environment; stop the existing listener before using that exact port for this app
-- Next recommended ticket: T0004 — Public Home Page
+- Next recommended ticket: Phase 2 content model/data consistency, plus Supabase dashboard setup and end-to-end admin/report QA.
