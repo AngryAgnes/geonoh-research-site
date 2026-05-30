@@ -1,20 +1,22 @@
 # Repo Current State
 
 - Current branch: `t0009-admin-report-management`
-- Completed tickets: T0000 (planning docs added), T0001 (Next.js scaffold initialized), T0002 (base layout, header, footer), T0002A (placeholder navigation pages), T0003 (demo data and core types), T0004 (public home page), T0004A (homepage styling and Tailwind setup fix), initial Supabase admin/report-management slice, Phase 1 public route coherence
+- Completed tickets: T0000 (planning docs added), T0001 (Next.js scaffold initialized), T0002 (base layout, header, footer), T0002A (placeholder navigation pages), T0003 (demo data and core types), T0004 (public home page), T0004A (homepage styling and Tailwind setup fix), initial Supabase admin/report-management slice, Phase 1 public route coherence, initial FastAPI health-check backend skeleton
 - Current app status: Next.js + TypeScript + Tailwind scaffold present in `src/`, with a persistent header/footer shell, public pages for `/`, `/research`, `/research/[slug]`, `/companies`, `/companies/[slug]`, and `/documents`, typed demo research data under `src/lib/demo-data/`, a homepage with explicit Supabase-vs-demo fallback behavior, and a protected `/admin` flow backed by Supabase Auth plus server-side approved-email checks.
 - Installed dependencies: declared dependencies are installed locally; `node_modules/` and `package-lock.json` are present.
 - Available scripts: `dev`, `build`, `start`, `lint`, `typecheck` (see `package.json`).
+- Backend status: a minimal FastAPI app lives under `apps/api` with a `/health` endpoint. It does not connect to Supabase or expose research/company/document/admin APIs yet. Run it with `cd apps/api && uv sync && uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`.
 - Demo data status: core TypeScript types are in `src/types/research.ts`; demo companies, analysis posts, research documents, thesis updates, stock snapshots, and lookup helpers are exported from `src/lib/demo-data/`.
 - Tailwind status: `src/app/layout.tsx` imports `./globals.css`; `src/app/globals.css` includes Tailwind base/components/utilities and base-layer body/link styling; `tailwind.config.cjs` scans `src/app`, `src/components`, and `src/lib` for `js`, `ts`, `jsx`, `tsx`, and `mdx` files.
 - Supabase/admin status: Supabase SSR and JS clients are installed. Public reads use the anon client. Admin login uses Supabase email/password auth. Admin writes/uploads use a server-only service role client after checking the signed-in email against `ADMIN_EMAILS`. The public header does not show an Admin link.
 - Report management status: `/admin` shows a configuration/login/access state, then an admin dashboard with report creation, draft/publish controls, optional company creation, and document upload. `/research`, `/research/[slug]`, `/companies`, `/companies/[slug]`, and `/documents` read published Supabase content when configured. `/analysis` redirects to `/research`. Public pages show clearly labeled demo fallback content only when Supabase is not configured. `/documents/[id]/download` creates a short-lived signed URL for public documents.
-- Build/typecheck status: `npm run typecheck`, `npm run build`, and `npm run lint` passed for the Phase 1 public route coherence slice on 2026-05-30.
+- Build/typecheck status: `npm run typecheck`, `npm run build`, and `npm run lint` passed for the FastAPI health-check backend slice on 2026-05-30. Backend tests passed with `uv run pytest`, and `curl http://127.0.0.1:8000/health` returned `{"status":"ok","service":"api","version":"0.1.0"}`.
 - Local dev verification: A production build listed routes for `/`, `/analysis`, `/companies`, `/companies/[slug]`, `/documents`, `/research`, and `/research/[slug]`. With no local Supabase environment variables configured, public pages use explicit demo fallback content and `/admin` shows the expected configuration-required state.
 - Known issues:
   - Supabase credentials, Auth user, schema, and storage bucket/policies still need to be configured in the Supabase dashboard.
   - End-to-end login, non-admin blocking, report creation, publishing, and upload/download flows require real Supabase credentials and were not fully exercised locally.
   - Google OAuth is not configured; admin login currently uses Supabase email/password.
   - Editing/deleting reports, rich Markdown rendering, essays/projects, and stock API are not implemented yet.
+  - The FastAPI backend is only a health-check skeleton; Next.js still owns all current public/admin data access.
   - Demo data is static and intentionally not connected to Supabase or live market data
 - Next recommended ticket: Phase 2 content model/data consistency, plus Supabase dashboard setup and end-to-end admin/report QA.
