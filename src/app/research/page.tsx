@@ -1,7 +1,6 @@
 import Link from 'next/link'
+import { getBackendResearchReports, type BackendResearchFailureReason } from '@/lib/backend/research'
 import { getCompanyByTicker, getPublishedAnalysisPosts } from '@/lib/demo-data'
-import { getPublishedReports } from '@/lib/reports'
-import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,9 +16,21 @@ const formatDate = (value: string | null): string => {
   }).format(new Date(value))
 }
 
+const formatFallbackReason = (reason: BackendResearchFailureReason): string => {
+  const labels: Record<BackendResearchFailureReason, string> = {
+    'backend-not-configured': 'the backend API URL is not configured',
+    'supabase-not-configured': 'the backend API is missing Supabase public read configuration',
+    'not-found': 'the backend API did not find a matching report',
+    'request-failed': 'the backend API request failed'
+  }
+
+  return labels[reason]
+}
+
 export default async function ResearchPage() {
-  const usingDemoFallback = !isSupabaseConfigured()
-  const reports = usingDemoFallback ? [] : await getPublishedReports()
+  const researchResult = await getBackendResearchReports()
+  const usingDemoFallback = !researchResult.ok
+  const reports = researchResult.ok ? researchResult.data : []
   const demoReports = usingDemoFallback ? getPublishedAnalysisPosts() : []
 
   return (
@@ -34,8 +45,8 @@ export default async function ResearchPage() {
 
       {usingDemoFallback ? (
         <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          Demo fallback mode: Supabase is not configured, so these are sample research records from
-          the local demo dataset.
+          Demo fallback mode: {formatFallbackReason(researchResult.reason)}, so these are sample
+          research records from the local demo dataset.
         </div>
       ) : null}
 

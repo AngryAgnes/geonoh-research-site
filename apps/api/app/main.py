@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.companies import router as companies_router
+from app.api.v1.documents import router as documents_router
+from app.api.v1.research import router as research_router
 from app.core.config import get_settings
 
 API_VERSION = "0.1.0"
@@ -25,6 +28,10 @@ def create_app() -> FastAPI:
             "service": "api",
             "version": API_VERSION,
         }
+
+    app.include_router(research_router, prefix="/v1")
+    app.include_router(companies_router, prefix="/v1")
+    app.include_router(documents_router, prefix="/v1")
 
     return app
 

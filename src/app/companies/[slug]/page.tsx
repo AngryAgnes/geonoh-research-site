@@ -1,12 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getBackendCompany, type BackendCompanyFailureReason } from '@/lib/backend/companies'
 import {
   analysisPosts,
   companies as demoCompanies,
   researchDocuments
 } from '@/lib/demo-data'
-import { getCompanyResearchHub } from '@/lib/reports'
-import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,10 +27,25 @@ const formatDate = (value: string | null): string => {
   }).format(new Date(value))
 }
 
-export default async function CompanyDetailPage({ params }: CompanyDetailPageProps) {
-  const usingDemoFallback = !isSupabaseConfigured()
+const formatFallbackReason = (reason: BackendCompanyFailureReason): string => {
+  const labels: Record<BackendCompanyFailureReason, string> = {
+    'backend-not-configured': 'the backend API URL is not configured',
+    'supabase-not-configured': 'the backend API is missing Supabase public read configuration',
+    'not-found': 'the backend API did not find a matching company',
+    'request-failed': 'the backend API request failed'
+  }
 
-  if (usingDemoFallback) {
+  return labels[reason]
+}
+
+export default async function CompanyDetailPage({ params }: CompanyDetailPageProps) {
+  const companyResult = await getBackendCompany(params.slug)
+
+  if (!companyResult.ok) {
+    if (companyResult.reason === 'not-found') {
+      notFound()
+    }
+
     const company = demoCompanies.find((item) => item.slug === params.slug)
 
     if (!company) {
@@ -55,8 +69,8 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
         </Link>
 
         <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          Demo fallback mode: Supabase is not configured, so this is a sample company hub from the
-          local demo dataset.
+          Demo fallback mode: {formatFallbackReason(companyResult.reason)}, so this is a sample
+          company hub from the local demo dataset.
         </div>
 
         <header className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -116,20 +130,7 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
     )
   }
 
-  const hub = await getCompanyResearchHub(params.slug)
-
-  if (!hub) {
-    notFound()
-  }
-
-  const publicDocuments = hub.reports.flatMap((report) =>
-    report.documents
-      .filter((document) => document.public)
-      .map((document) => ({
-        ...document,
-        reportTitle: report.title
-      }))
-  )
+  const company = companyResult.data
 
   return (
     <section>
@@ -142,13 +143,13 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
 
       <header className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-semibold uppercase text-slate-500">
-          {hub.company.ticker ?? 'Company'}
-          {hub.company.sector ? ` · ${hub.company.sector}` : ''}
+          {company.ticker ?? 'Company'}
+          {company.sector ? ` · ${company.sector}` : ''}
         </p>
-        <h1 className="mt-3 text-3xl font-semibold text-slate-950">{hub.company.name}</h1>
-        {hub.company.description ? (
+        <h1 className="mt-3 text-3xl font-semibold text-slate-950">{company.name}</h1>
+        {company.description ? (
           <p className="mt-5 max-w-3xl text-sm leading-6 text-slate-600">
-            {hub.company.description}
+            {company.description}
           </p>
         ) : null}
       </header>
@@ -157,8 +158,8 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">Published research</h2>
           <div className="mt-5 divide-y divide-slate-200">
-            {hub.reports.length > 0 ? (
-              hub.reports.map((report) => (
+            {company.reports.length > 0 ? (
+              company.reports.map((report) => (
                 <article key={report.id} className="py-4 first:pt-0 last:pb-0">
                   <h3 className="font-semibold text-slate-950">
                     <Link href={`/research/${report.slug}`} className="hover:text-emerald-700">
@@ -182,13 +183,13 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
         <aside className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-slate-950">Documents</h2>
           <div className="mt-5 space-y-4">
-            {publicDocuments.length > 0 ? (
-              publicDocuments.map((document) => (
+            {company.documents.length > 0 ? (
+              company.documents.map((document) => (
                 <div key={document.id} className="text-sm leading-6 text-slate-600">
                   <div className="font-semibold text-slate-900">
                     {document.title ?? document.filename}
                   </div>
-                  <div>{document.reportTitle}</div>
+                  <div>{document.report_title}</div>
                   <Link
                     href={`/documents/${document.id}/download`}
                     className="mt-2 inline-flex text-sm font-semibold text-slate-900 underline underline-offset-4 transition hover:text-emerald-700"

@@ -1,13 +1,24 @@
 import Link from 'next/link'
+import { getBackendCompanies, type BackendCompanyFailureReason } from '@/lib/backend/companies'
 import { companies as demoCompanies } from '@/lib/demo-data'
-import { getPublicCompanies } from '@/lib/reports'
-import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 export const dynamic = 'force-dynamic'
 
+const formatFallbackReason = (reason: BackendCompanyFailureReason): string => {
+  const labels: Record<BackendCompanyFailureReason, string> = {
+    'backend-not-configured': 'the backend API URL is not configured',
+    'supabase-not-configured': 'the backend API is missing Supabase public read configuration',
+    'not-found': 'the backend API did not find a matching company',
+    'request-failed': 'the backend API request failed'
+  }
+
+  return labels[reason]
+}
+
 export default async function CompaniesPage() {
-  const usingDemoFallback = !isSupabaseConfigured()
-  const companies = usingDemoFallback ? [] : await getPublicCompanies()
+  const companiesResult = await getBackendCompanies()
+  const usingDemoFallback = !companiesResult.ok
+  const companies = companiesResult.ok ? companiesResult.data : []
 
   return (
     <section>
@@ -21,8 +32,8 @@ export default async function CompaniesPage() {
 
       {usingDemoFallback ? (
         <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          Demo fallback mode: Supabase is not configured, so these are sample company records from
-          the local demo dataset.
+          Demo fallback mode: {formatFallbackReason(companiesResult.reason)}, so these are sample
+          company records from the local demo dataset.
         </div>
       ) : null}
 

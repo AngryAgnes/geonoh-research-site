@@ -10,10 +10,37 @@ import {
   getPublishedAnalysisPosts,
   researchDocuments
 } from '@/lib/demo-data'
-import { getPublicCompanies, getPublishedReports } from '@/lib/reports'
-import { isSupabaseConfigured } from '@/lib/supabase/config'
+import {
+  getBackendCompanies,
+  type BackendCompanyFailureReason
+} from '@/lib/backend/companies'
+import {
+  getBackendDocuments,
+  type BackendDocumentFailureReason
+} from '@/lib/backend/documents'
+import {
+  getBackendResearchReports,
+  type BackendResearchFailureReason
+} from '@/lib/backend/research'
 
 export const dynamic = 'force-dynamic'
+
+type HomepageFailureReason =
+  | BackendCompanyFailureReason
+  | BackendDocumentFailureReason
+  | BackendResearchFailureReason
+
+const formatFallbackReason = (reason: HomepageFailureReason): string => {
+  const labels: Record<HomepageFailureReason, string> = {
+    'backend-not-configured': 'the backend API URL is not configured',
+    'supabase-not-configured': 'the backend Supabase public-read configuration is unavailable',
+    'not-found': 'one backend homepage data source was not found',
+    forbidden: 'one backend homepage data source is not public',
+    'request-failed': 'the backend API request failed'
+  }
+
+  return labels[reason]
+}
 
 const formatDate = (value: string | null): string => {
   if (!value) {
@@ -28,17 +55,21 @@ const formatDate = (value: string | null): string => {
 }
 
 export default async function Home() {
-  const usingDemoFallback = !isSupabaseConfigured()
-  const reports = usingDemoFallback ? [] : await getPublishedReports()
-  const companies = usingDemoFallback ? [] : await getPublicCompanies()
-  const publicDocuments = reports.flatMap((report) =>
-    report.documents
-      .filter((document) => document.public)
-      .map((document) => ({
-        ...document,
-        reportTitle: report.title
-      }))
-  )
+  const [researchResult, companiesResult, documentsResult] = await Promise.all([
+    getBackendResearchReports(),
+    getBackendCompanies(),
+    getBackendDocuments()
+  ])
+
+  const fallbackReason =
+    (!researchResult.ok && researchResult.reason) ||
+    (!companiesResult.ok && companiesResult.reason) ||
+    (!documentsResult.ok && documentsResult.reason) ||
+    null
+  const usingDemoFallback = fallbackReason !== null
+  const reports = researchResult.ok ? researchResult.data : []
+  const companies = companiesResult.ok ? companiesResult.data : []
+  const publicDocuments = documentsResult.ok ? documentsResult.data : []
   const featuredAnalysis = getPublishedAnalysisPosts()
     .slice(0, 3)
     .map((post) => ({
@@ -54,8 +85,8 @@ export default async function Home() {
       {usingDemoFallback ? (
         <>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-            Demo fallback mode: Supabase is not configured, so the homepage is showing sample
-            research, companies, and document records from the local demo dataset.
+            Demo fallback mode: {formatFallbackReason(fallbackReason)}, so the homepage is showing
+            sample research, companies, and document records from the local demo dataset.
           </div>
           <FeaturedAnalysis items={featuredAnalysis} />
           <CompanyPreviewGrid companies={demoCompanies} />
@@ -192,8 +223,7 @@ export default async function Home() {
                     {publicDocuments.length} public document records available
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-300">
-                    Documents are sourced from published Supabase reports and public document
-                    metadata.
+                    Documents are sourced from the backend public document API.
                   </p>
                 </div>
 

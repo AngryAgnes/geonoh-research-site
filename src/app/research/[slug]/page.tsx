@@ -1,12 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getBackendResearchReport, type BackendResearchFailureReason } from '@/lib/backend/research'
 import {
   getAnalysisPostBySlug,
   getCompanyByTicker,
   getDocumentsByCompanyTicker
 } from '@/lib/demo-data'
-import { getPublishedReportBySlug } from '@/lib/reports'
-import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,10 +27,25 @@ const formatDate = (value: string | null): string => {
   }).format(new Date(value))
 }
 
-export default async function ResearchDetailPage({ params }: ResearchDetailPageProps) {
-  const usingDemoFallback = !isSupabaseConfigured()
+const formatFallbackReason = (reason: BackendResearchFailureReason): string => {
+  const labels: Record<BackendResearchFailureReason, string> = {
+    'backend-not-configured': 'the backend API URL is not configured',
+    'supabase-not-configured': 'the backend API is missing Supabase public read configuration',
+    'not-found': 'the backend API did not find a matching report',
+    'request-failed': 'the backend API request failed'
+  }
 
-  if (usingDemoFallback) {
+  return labels[reason]
+}
+
+export default async function ResearchDetailPage({ params }: ResearchDetailPageProps) {
+  const researchResult = await getBackendResearchReport(params.slug)
+
+  if (!researchResult.ok) {
+    if (researchResult.reason === 'not-found') {
+      notFound()
+    }
+
     const report = getAnalysisPostBySlug(params.slug)
 
     if (!report || report.status !== 'published') {
@@ -53,8 +67,8 @@ export default async function ResearchDetailPage({ params }: ResearchDetailPageP
         </Link>
 
         <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          Demo fallback mode: Supabase is not configured, so this is a sample research record from
-          the local demo dataset.
+          Demo fallback mode: {formatFallbackReason(researchResult.reason)}, so this is a sample
+          research record from the local demo dataset.
         </div>
 
         <header className="mt-8 border-b border-slate-200 pb-8">
@@ -100,12 +114,7 @@ export default async function ResearchDetailPage({ params }: ResearchDetailPageP
     )
   }
 
-  const report = await getPublishedReportBySlug(params.slug)
-
-  if (!report) {
-    notFound()
-  }
-
+  const report = researchResult.data
   const publicDocuments = report.documents.filter((document) => document.public)
 
   return (
